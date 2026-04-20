@@ -1,0 +1,25 @@
+# Application Fixes
+
+### 1. Frontend API URL
+- **File:** `frontend/app.js`
+- **Line:** 6
+- **Problem:** The API URL was hardcoded to `localhost:8000`, which would cause the frontend to fail when running inside a Docker container.
+- **Change:** Replaced the hardcoded string with `process.env.REACT_APP_API_URL || "http://localhost:8000"` to allow environment variable configuration.
+
+### 2. API Redis Connection
+- **File:** `api/main.py`
+- **Line:** [Check your main.py for the exact line number]
+- **Problem:** Redis host was hardcoded as "localhost", which prevents the API from connecting to the Redis container in Docker.
+- **Change:** Used `os.getenv("REDIS_HOST", "localhost")` to allow the host to be configured via environment variables.
+
+### 3. Worker Redis Connection
+- **File:** `worker/worker.py`
+- **Line:** 6
+- **Problem:** Redis host was hardcoded as "localhost", which would prevent the worker from connecting to the Redis container in a Docker network.
+- **Change:** Used `os.getenv("REDIS_HOST", "localhost")` to make the connection configurable.
+
+### 4. API Redundant Decoding
+- **File:** `api/main.py`
+- **Line:** 24
+- **Problem:** Attempting to call `.decode()` on a string (because `decode_responses=True` was set in the Redis client) would cause an AttributeError.
+- **Change:** Removed the `.decode()` call to return the status string directly.
