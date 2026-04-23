@@ -42,3 +42,22 @@ jobs:
 
       - name: Build Worker image
         run: docker build -t worker:${{ github.sha }} ./worker
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install fastapi pytest httpx
+
+      - name: Run tests
+        run: pytest api/tests
