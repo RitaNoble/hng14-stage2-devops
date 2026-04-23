@@ -1,29 +1,37 @@
-# ---------- Build Stage ----------
+# =========================
+# 1. Build Stage
+# =========================
 FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
 COPY requirements.txt .
-
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY . .
 
-# ---------- Final Stage ----------
+# =========================
+# 2. Production Stage
+# =========================
 FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m appuser
 
 WORKDIR /app
 
-# create non-root user (IMPORTANT for grading)
-RUN useradd -m appuser
+COPY --from=builder /usr/local /usr/local
+COPY --from=builder /app /app
+
+RUN chown -R appuser:appuser /app
+
 USER appuser
 
-COPY --from=builder /usr/local /usr/local
-COPY . .
-
-# expose API port
 EXPOSE 8000
 
-# health check (used by docker-compose)
-HEALTHCHECK CMD curl --fail http://localhost:8000/health || exit 1
+# IMPORTANT FIX FOR YOUR HEALTHCHECK ISSUE
+HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=5 \
+  CMD curl -fs http://localhost:8000/health || exit 1
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000"]

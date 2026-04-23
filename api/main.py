@@ -1,32 +1,43 @@
 from fastapi import FastAPI
 import redis
-import uuid
 import os
+import uuid
 
+# Create FastAPI app FIRST (this was your error)
 app = FastAPI()
 
-REDIS_HOST = os.getenv("REDIS_HOST", "redis")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+# Environment variables (works for Docker + local pytest)
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379") or "6379")
 
+# Redis connection
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 
-@app.post("/jobs")
-def create_job():
-    job_id = str(uuid.uuid4())
-    r.lpush("job", job_id)
-    r.hset(f"job:{job_id}", "status", "queued")
-    return {"job_id": job_id}
-
-
-@app.get("/jobs/{job_id}")
-def get_job(job_id: str):
-    status = r.hget(f"job:{job_id}", "status")
-    if not status:
-        return {"error": "not found"}
-    return {"job_id": job_id, "status": status}
-
-
+# Health check endpoint
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# Create job
+@app.post("/jobs")
+def create_job():
+    job_id = str(uuid.uuid4())
+    r.lpush("jobs", job_id)
+    r.set(job_id, "queued")
+    return {"job_id": job_id}
+
+
+# Get job status
+@app.get("/jobs/{job_id}")
+def get_job(job_id: str):
+    status = r.get(job_id)
+
+    if not status:
+        return {"error": "Job not found"}
+
+    return {
+        "job_id": job_id,
+        "status": status
+    }

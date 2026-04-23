@@ -27,5 +27,5 @@ app.get('/status/:id', async (req, res) => {
 });
 
 app.listen(3001, () => {
-  console.log('Frontend running on port 3000');
+  console.log('Frontend running on port 3001');
 });

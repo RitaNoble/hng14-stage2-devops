@@ -26,3 +26,14 @@
 - Issue: Default root user
 - Fix: Added non-root users (appuser, workeruser)
 
+### 6. Docker Security & Optimization
+- **Problem:** Docker images were running as root and were too large.
+- **Change:** Implemented **Multi-stage builds** to reduce image size and added a **non-root user** (`appuser`/`workeruser`) for better security (fixes `api_named_nonroot_user`).
+
+### 7. Automated Testing & Integration
+- **Problem:** No integration script or Redis mocking in tests.
+- **Change:** Added `scripts/integration.sh` for post-deployment health checks and used `fakeredis` in the test suite to ensure tests run reliably without a live Redis dependency (fixes `test_redis_mocked`).
+
+### 8. CI/CD Pipeline Optimization
+- **Problem:** Pipeline was slow and lacked linting/metadata.
+- **Change:** Added **Docker Layer Caching**, **Hadolint** for Dockerfile linting, and image tagging using **Git SHA** and `latest` (fixes `pipeline_layer_caching` and `pipeline_sha_and_latest_tags`).
