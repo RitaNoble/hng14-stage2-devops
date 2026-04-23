@@ -1,11 +1,14 @@
 #!/bin/bash
 set -e
-echo "🚀 Running Integration Health Check..."
-HEALTH=$(curl -s http://localhost:8000/health)
-if [[ $HEALTH == *"ok"* ]]; then
-  echo "✅ API is Healthy!"
+echo "Running Integration Test..."
+# Check API health
+URL="http://localhost:8000/health"
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" $URL)
+
+if [ "$STATUS" -eq 200 ]; then
+  echo "Integration Test Passed"
   exit 0
 else
-  echo "❌ API Health Check Failed: $HEALTH"
+  echo "Integration Test Failed with status $STATUS"
   exit 1
 fi
