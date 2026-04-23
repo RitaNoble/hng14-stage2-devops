@@ -42,6 +42,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Build API image
+        run: docker build -t hng14-stage2-devops-api ./api
+
+      - name: Build Worker image
+        run: docker build -t hng14-stage2-devops-worker ./worker
 
       - name: Scan API image with Trivy
         uses: aquasecurity/trivy-action@master
