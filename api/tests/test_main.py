@@ -11,7 +11,7 @@ def test_health():
     assert response.json()["status"] == "ok"
 
 
-@patch("api.main.r")
+@patch("main.r")
 def test_create_job(mock_redis):
     mock_redis.lpush.return_value = 1
     mock_redis.hset.return_value = 1
@@ -21,7 +21,7 @@ def test_create_job(mock_redis):
     assert "job_id" in response.json()
 
 
-@patch("api.main.r")
+@patch("main.r")
 def test_get_job(mock_redis):
     mock_redis.hget.return_value = "queued"
 
