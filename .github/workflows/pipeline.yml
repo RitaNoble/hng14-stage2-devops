@@ -74,42 +74,42 @@ jobs:
             trivy-api.sarif
             trivy-worker.sarif
 
-integration_test:
-  runs-on: ubuntu-latest
-  needs: [build, security]
+  integration_test:
+    runs-on: ubuntu-latest
+    needs: [build, security]
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install Docker Compose
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y docker-compose jq
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose jq
 
-    - name: Start services
-      run: docker compose up -d --build
+      - name: Start services
+        run: docker compose up -d --build
 
-    - name: Wait for API
-      run: sleep 15
+      - name: Wait for API
+        run: sleep 15
 
-    - name: Create job
-      run: |
-        JOB_ID=$(curl -s -X POST http://localhost:8000/jobs | jq -r .job_id)
-        echo "JOB_ID=$JOB_ID" >> $GITHUB_ENV
+      - name: Create job
+        run: |
+          JOB_ID=$(curl -s -X POST http://localhost:8000/jobs | jq -r .job_id)
+          echo "JOB_ID=$JOB_ID" >> $GITHUB_ENV
 
-    - name: Wait for completion
-      run: sleep 10
+      - name: Wait for completion
+        run: sleep 10
 
-    - name: Verify job status
-      run: |
-        STATUS=$(curl -s http://localhost:8000/jobs/$JOB_ID | jq -r .status)
-        echo "Status: $STATUS"
-        if [ "$STATUS" != "completed" ]; then
-          echo "Job not completed"
-          exit 1
-        fi
+      - name: Verify job status
+        run: |
+          STATUS=$(curl -s http://localhost:8000/jobs/$JOB_ID | jq -r .status)
+          echo "Status: $STATUS"
+          if [ "$STATUS" != "completed" ]; then
+            echo "Job not completed"
+            exit 1
+          fi
 
-    - name: Shutdown services
-      if: always()
-      run: docker compose down
+      - name: Shutdown services
+        if: always()
+        run: docker compose down
