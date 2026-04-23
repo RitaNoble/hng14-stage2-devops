@@ -1,0 +1,37 @@
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    networks:
+      - backend
+    restart: always
+
+  api:
+    build: ./api
+    container_name: api
+    networks:
+      - backend
+    restart: always
+
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+    ports:
+      - "8000:8000"
+
+  worker:
+    build: ./worker
+    container_name: worker
+    networks:
+      - backend
+    restart: always
+
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+networks:
+  backend:
+    driver: bridge
