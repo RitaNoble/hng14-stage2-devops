@@ -1,4 +1,6 @@
-DevOps Stage 2 – Microservices Job Processing System
+#hng14-stage2-devops
+
+📦 DevOps Stage 2 – Microservices Job Processing System
 📌 Overview
 
 This project is a containerized microservices job processing system built as part of the HNG Stage 2 DevOps assessment.
@@ -14,7 +16,6 @@ All services are containerized using Docker and orchestrated with Docker Compose
 
 🏗️ System Architecture
 Frontend → API → Redis Queue → Worker → API → Frontend
-
 Flow Explanation:
 User submits a job via the frontend
 Frontend sends request to API
@@ -22,16 +23,16 @@ API stores job in Redis queue
 Worker picks job from Redis and processes it
 Worker updates job status
 API returns updated status to frontend/client
+⚙️ Prerequisites
 
-Prerequisites
 Ensure the following are installed:
+
 Docker (>= 20+)
 Docker Compose
 Git
 curl
 jq
-
- How to Run the Application
+🚀 How to Run the Application
 1. Clone the repository
 git clone https://github.com/<your-username>/hng14-stage2-devops.git
 cd hng14-stage2-devops
@@ -41,11 +42,12 @@ docker compose up -d --build
 docker ps
 
 Expected containers:
+
 api
 worker
 redis
-
 4. Test API manually
+
 Create a job:
 
 curl -X POST http://localhost:8000/jobs
@@ -66,8 +68,7 @@ Expected output:
   "job_id": "...",
   "status": "completed"
 }
-
- Running Tests
+🧪 Running Tests
 API Unit Tests
 pytest api/tests -v
 
@@ -76,16 +77,14 @@ Tests include:
 Job creation
 Job status retrieval
 Redis mocking validation
-
- Environment Variables
+🔐 Environment Variables
 
 The system uses the following environment variables:
 
 API / Worker
 REDIS_HOST=redis
 REDIS_PORT=6379
-
- Docker Services
+🐳 Docker Services
 API Service
 Built from ./api
 Exposes port 8000
@@ -96,9 +95,10 @@ Consumes jobs from Redis queue
 Redis Service
 Internal service only
 Not exposed externally
+🔄 CI/CD Pipeline
 
- CI/CD Pipeline
 The GitHub Actions pipeline runs in the following order:
+
 lint → test → build → security scan → integration test → deploy
 Pipeline Stages
 1. Lint
@@ -121,8 +121,7 @@ Validates final job status
 6. Deploy
 Runs only on main
 Performs rolling update with health checks
-
- Success Criteria
+📊 Success Criteria
 
 A successful run should show:
 
@@ -131,17 +130,15 @@ Job successfully created
 Worker processes job
 Final status = completed
 Pipeline passes all stages
-
- Documentation
+🧾 Documentation
 README.md → System setup and usage guide
 FIXES.md → List of all bugs found and fixed during development
 .env.example → Required environment variables template
-
- Important Notes
+⚠️ Important Notes
 .env files must NOT be committed
 All services must communicate via Docker internal network
 Redis must NOT be exposed externally
 All services must run as non-root users inside containers
+👩‍💻 Author
 
- Author
-Built as part of HNG Internship Stage 2 DevOps Track submission.
+Built as part of HNG Stage 2 DevOps Track submission.
