@@ -1,37 +1,112 @@
+version: "3.9"
+
 services:
 
   redis:
     image: redis:7-alpine
     container_name: redis
     networks:
-      - backend
+      - app-network
     restart: always
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
 
   api:
     build: ./api
     container_name: api
     networks:
-      - backend
+      - app-network
     restart: always
 
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
 
     ports:
       - "8000:8000"
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/jobs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
 
   worker:
     build: ./worker
     container_name: worker
     networks:
-      - backend
+      - app-network
     restart: always
 
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "print('ok')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    networks:
+      - app-network
+    restart: always
+
+    environment:
+      REACT_APP_API_URL: ${API_URL}
+
+    ports:
+      - "3001:3001"
+
+    depends_on:
+      api:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3001"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
 
 networks:
-  backend:
+  app-network:
     driver: bridge
