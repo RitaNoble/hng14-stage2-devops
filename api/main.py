@@ -5,9 +5,11 @@ import os
 
 app = FastAPI()
 
-import os
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-r = redis.Redis(host=REDIS_HOST, port=6379, decode_responses=True)
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+
 
 @app.post("/jobs")
 def create_job():
@@ -16,12 +18,14 @@ def create_job():
     r.hset(f"job:{job_id}", "status", "queued")
     return {"job_id": job_id}
 
+
 @app.get("/jobs/{job_id}")
 def get_job(job_id: str):
     status = r.hget(f"job:{job_id}", "status")
     if not status:
         return {"error": "not found"}
-    return {"job_id": job_id, "status": status} 
+    return {"job_id": job_id, "status": status}
+
 
 @app.get("/health")
 def health():
