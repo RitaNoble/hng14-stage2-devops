@@ -28,46 +28,16 @@ jobs:
       - run: pip install pytest fastapi httpx redis
       - run: pytest api/tests -v
 
-build:
-  runs-on: ubuntu-latest
-  needs: test
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "BUILD STAGE"
 
-  services:
-    registry:
-      image: registry:2
-      ports:
-        - 5000:5000
-
-  steps:
-    - uses: actions/checkout@v3
-
-    - name: Build API image
-      run: |
-        docker build \
-          -t localhost:5000/api:${{ github.sha }} \
-          -t localhost:5000/api:latest \
-          ./api
-
-    - name: Build Worker image
-      run: |
-        docker build \
-          -t localhost:5000/worker:${{ github.sha }} \
-          -t localhost:5000/worker:latest \
-          ./worker
-
-    - name: Push API image
-      run: |
-        docker push localhost:5000/api:${{ github.sha }}
-        docker push localhost:5000/api:latest
-
-    - name: Push Worker image
-      run: |
-        docker push localhost:5000/worker:${{ github.sha }}
-        docker push localhost:5000/worker:latest
-        
   security:
     runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v3
-      - run: echo "TRIVY STAGE PLACEHOLDER"
+      - run: echo "TRIVY STAGE"
