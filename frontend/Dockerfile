@@ -1,29 +1,27 @@
-# ===== Stage 1: Build =====
-FROM node:18-alpine AS builder
+# ---------- Build Stage ----------
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --omit=dev
 
 COPY . .
 
-# ===== Stage 2: Production =====
-FROM node:18-alpine
 
-WORKDIR /app
+# ---------- Production Stage ----------
+FROM node:20-alpine
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-COPY --from=builder /app /app
+WORKDIR /app
 
-RUN chown -R appuser:appgroup /app
+COPY --from=builder /app /app
 
 USER appuser
 
 EXPOSE 3001
 
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -qO- http://localhost:3001 || exit 1
+HEALTHCHECK CMD wget --spider -q http://localhost:3001 || exit 1
 
 CMD ["node", "app.js"]
