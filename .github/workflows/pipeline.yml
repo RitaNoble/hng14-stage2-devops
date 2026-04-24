@@ -108,6 +108,6 @@ steps:
   - name: Build Frontend image
     run: docker build -t frontend ./frontend
 
-  # Optional (safe local test build)
   - name: Verify docker compose config
     run: docker compose config
+```
